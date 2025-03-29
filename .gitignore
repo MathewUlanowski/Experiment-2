@@ -1,0 +1,17 @@
+*.env
+data_cache
+data_cache*
+
+__pycache__
+*.py[cod]
+*.pyo
+*.pyd
+*.pdb
+*.egg-info
+*.egg
+*.whl
+*.zip
+*.tar.gz
+*.tar.bz2
+
+data
