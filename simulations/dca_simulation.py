@@ -3,7 +3,9 @@ import logging
 from matplotlib.dates import relativedelta  # Import logging for exception handling
 from models.account import Account
 from data_fetchers.getYFinanceData import fetch_data
+from services.cache_service import cache_response, get_cached_response
 from utils.date_utils import pad_historical_prices
+import hashlib
 from datetime import datetime, date # Import the datetime module
 from services.company_service import get_company_name  # Import a service to fetch company names
 
@@ -34,11 +36,23 @@ def run_dca_simulation(params):
 
         accounts = []  # List to store accounts for each ticker
 
+        shares = 0
         for ticker in tickers:
-            historical_data = fetch_data(tickers=[ticker], period="max")
+            # hash the ticker and the params to create a unique cache key
+            ticker_hash = hashlib.sha256(f"{ticker},{start_date},{end_date},{initial_investment},{monthly_investment}".encode()).hexdigest()
+
+            # look for a cache for the specific ticker
+            ticker_cache = get_cached_response(f"dca_sim-{ticker_hash}")
+            if ticker_cache:
+                logging.info(f"Returning cached response for {ticker}. (dca_sim-{ticker_hash})")
+                accounts.append(ticker_cache)
+                continue
+
+            historical_datas = fetch_data(tickers=[ticker], period="max")
+            historical_data = historical_datas[ticker]
 
             # Extract company name from the historical data or query for it
-            company_name = historical_data.get("company_name")
+            company_name = historical_datas.get("company_name")
             if not company_name:
                 company_name = get_company_name(ticker)  # Query for the company name if not available
 
@@ -60,42 +74,31 @@ def run_dca_simulation(params):
                     # find the close price for the current date in historical data
                     current_price = None
                     for data in historical_data:
+                        # logging.info(f"Checking data for {ticker} on {current_date}: {data["Close"]}")
                         if data['Date'] == current_date.strftime("%Y-%m-%d"):
                             current_price = data.get('Close')
                             break
-                    logging.info(f"Current price for {ticker} on {current_date}: {current_price}")
+                    # if current price is not none log how many shares we can buy
+                    if current_price is not None and cash_account.balance // current_price > 0:
+                        pass
+                        # buy shares 
+                        shares += cash_account.balance // current_price
+                        cash_account.deduct_funds(current_date,cash_account.balance // current_price * current_price)
+                        investment_account.record_balance(current_date, shares * current_price)
 
+                if(current_date.day == 1):
+                    # Record the balance for the investment account
+                    account.balance_history.append({
+                        "date": current_date.strftime("%Y-%m-%d"),
+                        "account_balance": investment_account.balance + cash_account.balance,
+                        "shares": shares,
+                        "price": current_price,
+                    })
                 current_date += relativedelta(days=1)
+            accounts.append(account)
 
-
-            # # Iterate through the padded prices to simulate DCA
-            # for i in range(len(padded_prices)):
-            #     # Extract the current date and check if it's a trade day
-            #     current_date = padded_prices[i]['Date']
-            #     current_price = padded_prices[i].get('Close')
-
-            #     if current_price is None:  # Skip non-trade days
-            #         continue
-
-            #     # Calculate the current month
-            #     current_month = datetime.strptime(current_date, "%Y-%m-%d").month
-
-            #     # Add the monthly investment only if the month has changed
-            #     if current_month != last_month:
-            #         cash_balance += monthly_investment
-            #         last_month = current_month
-
-            #     # Calculate the number of shares to buy with the cash balance
-            #     shares_to_buy = cash_balance // current_price
-            #     invested_balance += shares_to_buy * current_price
-            #     cash_balance -= shares_to_buy * current_price
-
-            #     # Credit the total balance (cash + invested) to the account for the current day
-            #     total_balance = cash_balance + invested_balance
-            #     account.record_balance(current_date, total_balance)
-
-            # # Add the account for this ticker to the list
-            # accounts.append(account)
+            # Cache the account for the specific ticker
+            cache_response(f"dca_sim-{ticker_hash}", account)
 
         return accounts  # Return a list of accounts, one for each ticker
     except Exception as e:

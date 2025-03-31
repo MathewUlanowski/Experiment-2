@@ -33,11 +33,6 @@ def run_bond_simulation(params):
         initial_investment = int(params["initial_investment"].replace("$", "").replace(",", ""))
         monthly_investment = int(params["monthly_investment"].replace("$", "").replace(",", ""))
 
-        logging.info(f"Running bond simulation from {start_date} to {end_date}")
-        logging.info(f"Initial investment: {initial_investment}, Monthly investment: {monthly_investment}")
-
-
-
         # Initialize accounts and variables
         bond_account = Account(start_date,name="Bond Account")
         current_date = start_date

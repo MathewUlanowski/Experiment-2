@@ -34,10 +34,9 @@ def search_stock_tickers(query):
     data = response.json()
     results = data.get("results", [])
     formatted_results = [{"symbol": result["ticker"], "name": result["name"]} for result in results]
-
+    
     # Cache the response
     search_cache[query] = formatted_results
-    logging.info(f"Cache updated for query: {query}")
 
     return formatted_results
 

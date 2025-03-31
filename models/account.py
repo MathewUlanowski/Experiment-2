@@ -52,7 +52,7 @@ class Account:
         """
         return self.assets * asset_price + self.balance
 
-    def deduct_funds(self, amount):
+    def deduct_funds(self, date, amount):
         """
         Deducts funds from the account balance.
 
@@ -60,7 +60,7 @@ class Account:
         """
         if self.balance >= amount:
             self.balance -= amount
-            self._record_history()
+            self._record_history(date)
 
     def _record_history(self, date):
         """
@@ -75,7 +75,6 @@ class Account:
         :param date: The date for which the balance is being recorded.
         :param balance: The balance to record.
         """
-        balance = round(balance, 2)
         self.balance = balance
         self.balance_history.append({"date": date.strftime("%Y-%m-%d"), "account_balance": balance})
 
