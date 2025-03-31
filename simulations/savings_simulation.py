@@ -21,22 +21,13 @@ def run_savings_simulation(params):
     initial_investment = int(params["initial_investment"])
     monthly_investment = int(params["monthly_investment"])
 
-    # Log as date objects for consistency
-    logging.info(f"Running savings simulation from {start_date.date()} to {end_date.date()}")
-    logging.info(f"Initial investment: {initial_investment}, Monthly investment: {monthly_investment}")
-
     # Create the account with the name "Saving"
-    account = Account(initial_balance=initial_investment, name="Saving")
+    account = Account(start_date,initial_balance=initial_investment, name="Saving")
     current_date: datetime = start_date
 
     while current_date <= end_date:
         if current_date.day == 1:
-            logging.info(f"Adding monthly investment of {monthly_investment} on {current_date.strftime('%Y-%m-%d')}")
-            account.balance_history.append({
-                "date": current_date.strftime("%Y-%m-%d"),
-                "cash": account.balance,
-                "account_balance": account.balance + monthly_investment
-            })
+            account.record_balance(current_date, account.balance + monthly_investment)  # Record balance before adding funds
         current_date += relativedelta(days=1)
 
     return [account]

@@ -39,7 +39,7 @@ def run_bond_simulation(params):
 
 
         # Initialize accounts and variables
-        bond_account = Account(name="Bond Account")
+        bond_account = Account(start_date,name="Bond Account")
         current_date = start_date
         pending_cash = initial_investment + monthly_investment  # Include initial investment in pending cash
         bonds = []
@@ -75,7 +75,6 @@ def run_bond_simulation(params):
                     matured_value = bond.get_matured_value()
                     pending_cash += matured_value
                     pending_cash = math.floor(pending_cash * 100) / 100  # Floor to the nearest cent
-                    logging.info(f"{current_date_str}: M{bond} ${bond.get_matured_value()}")
                     bonds.remove(bond)
 
             # Purchase bonds in $100 increments
@@ -86,7 +85,6 @@ def run_bond_simulation(params):
                 bonds.append(bond)
                 pending_cash -= bond_purchase_amount
                 pending_cash = math.floor(pending_cash * 100) / 100  # Floor to the nearest cent
-                logging.info(f"{current_date_str}: {bond}")
 
             # Record balances only on the 1st of the month
             if current_date.day == 1:

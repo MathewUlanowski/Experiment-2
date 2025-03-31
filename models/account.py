@@ -1,10 +1,10 @@
-from datetime import datetime
+from datetime import date, datetime
 
 class Account:
     """
     Represents a generic investment account that tracks balance, investments, and assets (e.g., shares, bonds).
     """
-    def __init__(self, initial_balance=0, name="Unnamed Account"):
+    def __init__(self, date: date, initial_balance=0, name="Unnamed Account"):
         """
         Initializes the account with an initial balance and an optional name.
 
@@ -15,10 +15,10 @@ class Account:
         self.balance = initial_balance
         self.total_invested = initial_balance
         self.assets = 0  # Represents the quantity of assets (e.g., shares, bonds)
-        self.history = [{"timestamp": datetime.now(), "balance": initial_balance}]  # Track balance changes with timestamps
-        self.balance_history = [{"date": datetime.now().strftime("%Y-%m-%d"), "account_balance": initial_balance}]  # Use current date
+        self.history = [{"timestamp": date, "balance": initial_balance}]  # Track balance changes with timestamps
+        self.balance_history = [{"date": date.strftime("%Y-%m-%d"), "account_balance": initial_balance}]  # Use current date
 
-    def add_funds(self, amount):
+    def add_funds(self, amount, date):
         """
         Adds funds to the account and updates the total invested amount.
 
@@ -26,7 +26,7 @@ class Account:
         """
         self.balance += amount
         self.total_invested += amount
-        self._record_history()
+        self._record_history(date)
 
     def buy_assets(self, price):
         """
@@ -62,11 +62,11 @@ class Account:
             self.balance -= amount
             self._record_history()
 
-    def _record_history(self):
+    def _record_history(self, date):
         """
         Records the current balance and timestamp in the history.
         """
-        self.history.append({"timestamp": datetime.now(), "balance": self.balance})
+        self.history.append({"date": date, "balance": self.balance})
 
     def record_balance(self, date, balance):
         """
@@ -75,6 +75,8 @@ class Account:
         :param date: The date for which the balance is being recorded.
         :param balance: The balance to record.
         """
+        balance = round(balance, 2)
+        self.balance = balance
         self.balance_history.append({"date": date.strftime("%Y-%m-%d"), "account_balance": balance})
 
     def get_balance_history(self):
