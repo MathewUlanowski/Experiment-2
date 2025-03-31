@@ -30,8 +30,8 @@ def run_dca_simulation(params):
     try:
         start_date: datetime = datetime.strptime(params["start_date"], "%Y-%m-%d")
         end_date: datetime = datetime.strptime(params["end_date"], "%Y-%m-%d")
-        initial_investment = int(params["initial_investment"])
-        monthly_investment = int(params["monthly_investment"])
+        initial_investment = int(str(params["initial_investment"].replace(",", "")))
+        monthly_investment = int(str(params["monthly_investment"].replace(",", "")))
         tickers: list[str] = params["tickers"].split(",") if isinstance(params["tickers"], str) else params["tickers"]
 
         accounts = []  # List to store accounts for each ticker

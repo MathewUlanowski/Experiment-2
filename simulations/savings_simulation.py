@@ -18,8 +18,8 @@ def run_savings_simulation(params):
     # Derive start_date and end_date as datetime objects
     start_date: datetime = datetime.strptime(params["start_date"], "%Y-%m-%d")
     end_date: datetime = datetime.strptime(params["end_date"], "%Y-%m-%d")
-    initial_investment = int(params["initial_investment"])
-    monthly_investment = int(params["monthly_investment"])
+    initial_investment = int(str(params["initial_investment"].replace(",", "")))
+    monthly_investment = int(str(params["monthly_investment"].replace(",", "")))
 
     # Create the account with the name "Saving"
     account = Account(start_date,initial_balance=initial_investment, name="Saving")
