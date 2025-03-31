@@ -36,7 +36,6 @@ def run_dca_simulation(params):
 
         accounts = []  # List to store accounts for each ticker
 
-        shares = 0
         for ticker in tickers:
             # hash the ticker and the params to create a unique cache key
             ticker_hash = hashlib.sha256(f"{ticker},{start_date},{end_date},{initial_investment},{monthly_investment}".encode()).hexdigest()
@@ -48,13 +47,22 @@ def run_dca_simulation(params):
                 accounts.append(ticker_cache)
                 continue
 
+            # Validate the response from fetch_data
             historical_datas = fetch_data(tickers=[ticker], period="max")
+            if not historical_datas or ticker not in historical_datas:
+                logging.error(f"Invalid or empty response from fetch_data for ticker: {ticker}")
+                continue  # Skip this ticker and move to the next one
+
             historical_data = historical_datas[ticker]
 
-            # Extract company name from the historical data or query for it
+            # Validate the company name
             company_name = historical_datas.get("company_name")
             if not company_name:
-                company_name = get_company_name(ticker)  # Query for the company name if not available
+                try:
+                    company_name = get_company_name(ticker)
+                except Exception as e:
+                    logging.error(f"Failed to fetch company name for ticker {ticker}: {e}")
+                    company_name = "Unknown Company"
 
             # Initialize the account with the initial investment and name
             account_name = f"(DCA) {ticker} - {company_name}"
@@ -65,6 +73,7 @@ def run_dca_simulation(params):
 
 
             current_date = start_date
+            shares = 0
             while current_date <= end_date:
 
                 if current_date.day == 1:
@@ -86,19 +95,26 @@ def run_dca_simulation(params):
                         cash_account.deduct_funds(current_date,cash_account.balance // current_price * current_price)
                         investment_account.record_balance(current_date, shares * current_price)
 
-                if(current_date.day == 1):
+                # Validate the current price
+                if current_price is None:
+                    pass
+                else:
                     # Record the balance for the investment account
-                    account.balance_history.append({
-                        "date": current_date.strftime("%Y-%m-%d"),
-                        "account_balance": investment_account.balance + cash_account.balance,
-                        "shares": shares,
-                        "price": current_price,
-                    })
+                    if(current_date.day == 1):
+                        account.balance_history.append({
+                            "date": current_date.strftime("%Y-%m-%d"),
+                            "account_balance": investment_account.balance + cash_account.balance,
+                            "shares": shares,
+                            "price": current_price,
+                        })
                 current_date += relativedelta(days=1)
             accounts.append(account)
 
             # Cache the account for the specific ticker
-            cache_response(f"dca_sim-{ticker_hash}", account)
+            try:
+                cache_response(f"dca_sim-{ticker_hash}", account)
+            except Exception as e:
+                logging.error(f"Failed to cache response for ticker {ticker}: {e}")
 
         return accounts  # Return a list of accounts, one for each ticker
     except Exception as e:

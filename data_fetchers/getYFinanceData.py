@@ -10,7 +10,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(
 # In-memory cache for stock data
 stock_data_cache = {}
 
-def fetch_data(tickers=["AAPL", "TSLA", "MSFT"], period="1y", skip_beautify=False):
+def fetch_data(tickers=["AAPL", "TSLA", "MSFT"], period="max", skip_beautify=False):
     """
     Fetches stock data for the given tickers using an in-memory cache, folder cache, or API call.
 
@@ -23,6 +23,7 @@ def fetch_data(tickers=["AAPL", "TSLA", "MSFT"], period="1y", skip_beautify=Fals
     os.makedirs(stock_data_folder, exist_ok=True)
 
     fetched_data = {}
+    fetched_from_api = False  # Track if any data is fetched from the API
 
     for ticker in tickers:
         cache_key = f"{ticker}_{period}"
@@ -66,15 +67,18 @@ def fetch_data(tickers=["AAPL", "TSLA", "MSFT"], period="1y", skip_beautify=Fals
             # Update in-memory cache
             stock_data_cache[cache_key] = records
             fetched_data[ticker] = records
+
+            fetched_from_api = True  # Mark that data was fetched from the API
         except Exception as e:
             logging.error(f"Error fetching data for {ticker}: {e}")
 
-    # Beautify the JSON files
-    try:
-        beautify_json_in_directory(stock_data_folder, skip_beautify=skip_beautify)
-        logging.info("Stock JSON files beautified successfully.")
-    except Exception as e:
-        logging.error(f"Error beautifying stock JSON files: {e}")
+    # Beautify the JSON files only if data was fetched from the API
+    if fetched_from_api:
+        try:
+            beautify_json_in_directory(stock_data_folder, skip_beautify=skip_beautify)
+            logging.info("Stock JSON files beautified successfully.")
+        except Exception as e:
+            logging.error(f"Error beautifying stock JSON files: {e}")
 
     return fetched_data
 
