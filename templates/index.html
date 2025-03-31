@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulation Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/static/css/styles.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="/static/js/scripts.js" defer></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+</head>
+<body>
+    <div class="container mt-5">
+        <h1 class="text-center">Simulation Dashboard</h1>
+        <form id="simulation-form" class="mt-4">
+            <div class="mb-3">
+                <label for="start_date" class="form-label">Start Date</label>
+                <input type="date" class="form-control" id="start_date" name="start_date" 
+                       value="{{ (datetime.today().replace(day=1) - timedelta(days=3*365)).replace(day=1).strftime('%Y-%m-%d') }}">
+            </div>
+            <div class="mb-3">
+                <label for="end_date" class="form-label">End Date</label>
+                <input type="date" class="form-control" id="end_date" name="end_date" 
+                       value="{{ datetime.today().replace(day=1).strftime('%Y-%m-%d') }}">
+            </div>
+            <div class="mb-3">
+                <label for="initial_investment" class="form-label">Initial Investment</label>
+                <input type="text" class="form-control" id="initial_investment" name="initial_investment" required>
+            </div>
+            <div class="mb-3">
+                <label for="monthly_investment" class="form-label">Monthly Investment</label>
+                <input type="text" class="form-control" id="monthly_investment" name="monthly_investment" required>
+            </div>
+            <div class="mb-3">
+                <label for="ticker-search" class="form-label">Search Stock Tickers</label>
+                <input type="text" class="form-control" id="ticker-search" placeholder="Type to search for stock tickers">
+                <ul id="ticker-dropdown" class="dropdown-menu w-100" style="display: none;"></ul>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Selected Tickers</label>
+                <div id="selected-tickers" class="d-flex flex-wrap gap-2">
+                    <!-- Selected tickers will appear here as bubbles -->
+                </div>
+            </div>
+            <div class="mb-3">
+                <label class="form-label">Select Simulations to Run</label>
+                <div id="simulations-container" class="form-check">
+                    <!-- Simulation checkboxes will be dynamically populated here -->
+                </div>
+            </div>
+            <button type="button" class="btn btn-primary" id="simulate-btn">Run Simulation</button>
+        </form>
+        <div class="mt-4">
+            <button type="button" class="btn btn-warning" id="clear-cache-btn">Clear Cache</button>
+            <button type="button" class="btn btn-danger" id="delete-data-cache-btn">Delete Data Cache</button>
+        </div>
+        <div class="mt-4">
+            <h3 class="text-center">Simulation Graph</h3>
+            <div id="simulation-graph">
+                <!-- Graph will be displayed here -->
+            </div>
+            <div id="loading-indicator" class="text-center mt-3" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <p>Loading simulation graph...</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,46 @@
+body {
+    background-color: #121212;
+    color: #ffffff;
+}
+
+.btn-primary {
+    background-color: #1a73e8;
+    border-color: #1a73e8;
+}
+
+.btn-danger {
+    background-color: #d32f2f;
+    border-color: #d32f2f;
+}
+
+#loading-indicator {
+    display: none;
+    text-align: center;
+    margin-top: 20px;
+}
+
+#ticker-dropdown {
+    max-height: 200px; /* Limit the height to make it scrollable */
+    overflow-y: auto; /* Enable vertical scrolling */
+    overflow-x: hidden; /* Prevent horizontal scrolling */
+    position: absolute;
+    z-index: 1000;
+    max-width: 50%; /* Limit the dropdown width to 50% of the parent container */
+    background-color: #ffffff; /* Ensure dropdown has a white background */
+    border: 1px solid #ccc; /* Add a border for better visibility */
+    border-radius: 0.25rem; /* Add slight rounding to corners */
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1); /* Add a subtle shadow for better visibility */
+    white-space: nowrap; /* Prevent text wrapping inside the dropdown */
+    overflow-anchor: none; /* Prevent unintended scrolling when navigating with arrow keys */
+}
+
+#selected-tickers .badge {
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    cursor: default;
+}
+
+.dropdown-item.active {
+    background-color: #1a73e8;
+    color: #ffffff;
+}

@@ -1,4 +1,4 @@
-*.env
+secrets.env
 data_cache
 data_cache*
 
