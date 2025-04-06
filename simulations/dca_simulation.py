@@ -55,6 +55,9 @@ def run_dca_simulation(params):
 
             historical_data = historical_datas[ticker]
 
+            # Preprocess historical data into a dictionary for fast lookups
+            historical_data_dict = {data['Date']: data['Close'] for data in historical_data}
+
             # Validate the company name
             company_name = historical_datas.get("company_name")
             if not company_name:
@@ -71,7 +74,6 @@ def run_dca_simulation(params):
             cash_account = Account(start_date, initial_balance=initial_investment, name=f"Cash Account - {ticker}")
             investment_account = Account(start_date, initial_balance=0, name=f"Investment Account - {ticker}")
 
-
             current_date = start_date
             shares = 0
             while current_date <= end_date:
@@ -80,34 +82,27 @@ def run_dca_simulation(params):
                     cash_account.record_balance(current_date, cash_account.balance + monthly_investment)
 
                 if cash_account.balance > 0:
-                    # find the close price for the current date in historical data
-                    current_price = None
-                    for data in historical_data:
-                        # logging.info(f"Checking data for {ticker} on {current_date}: {data["Close"]}")
-                        if data['Date'] == current_date.strftime("%Y-%m-%d"):
-                            current_price = data.get('Close')
-                            break
-                    # if current price is not none log how many shares we can buy
+                    # Find the close price for the current date in historical data dictionary
+                    current_price = historical_data_dict.get(current_date.strftime("%Y-%m-%d"))
+
+                    # If current price is valid, calculate shares to buy
                     if current_price is not None and cash_account.balance // current_price > 0:
-                        pass
-                        # buy shares 
-                        shares += cash_account.balance // current_price
-                        cash_account.deduct_funds(current_date,cash_account.balance // current_price * current_price)
+                        shares_to_buy = cash_account.balance // current_price
+                        shares += shares_to_buy
+                        cash_account.deduct_funds(current_date, shares_to_buy * current_price)
                         investment_account.record_balance(current_date, shares * current_price)
 
-                # Validate the current price
-                if current_price is None:
-                    pass
-                else:
-                    # Record the balance for the investment account
-                    if(current_date.day == 1):
-                        account.balance_history.append({
-                            "date": current_date.strftime("%Y-%m-%d"),
-                            "account_balance": investment_account.balance + cash_account.balance,
-                            "shares": shares,
-                            "price": current_price,
-                        })
+                # Record the balance for the investment account
+                if current_date.day == 1:
+                    account.balance_history.append({
+                        "date": current_date.strftime("%Y-%m-%d"),
+                        "account_balance": investment_account.balance + cash_account.balance,
+                        "shares": shares,
+                        "price": current_price if current_price is not None else 0,
+                    })
+
                 current_date += relativedelta(days=1)
+
             accounts.append(account)
 
             # Cache the account for the specific ticker
