@@ -27,7 +27,12 @@ def run_savings_simulation(params):
 
     while current_date <= end_date:
         if current_date.day == 1:
-            account.record_balance(current_date, account.balance + monthly_investment)  # Record balance before adding funds
+            account.record_balance(current_date, account.balance + monthly_investment)
+            account.balance_history[-1].update({
+                "date": current_date.strftime("%Y-%m-%d"),
+                "account_balance": account.balance,
+                "monthly_investment": monthly_investment
+            })
         current_date += relativedelta(days=1)
 
     return [account]

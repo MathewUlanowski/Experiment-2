@@ -1,3 +1,6 @@
+import random
+import json
+
 import plotly.graph_objs as go
 
 def generate_plot(balance_histories):
@@ -14,6 +17,8 @@ def generate_plot(balance_histories):
         if not balance_history:
             continue
 
+
+
         # Extract dates and account balances
         dates = [entry["date"] for entry in balance_history]
         account_balances = [entry["account_balance"] for entry in balance_history]
@@ -23,11 +28,11 @@ def generate_plot(balance_histories):
         customdata = []
 
         for key in balance_history[0].keys():
+            print(f"Processing key: {key}")
             if key not in ["date", "account_balance"]:
                 hovertemplate += f"<b>{key.replace('_', ' ').title()}:</b> %{{customdata[{len(customdata)}]}}<br>"
                 customdata.append([entry[key] for entry in balance_history])
 
-        hovertemplate += "<extra></extra>"  # Remove extra hover info
 
         # Transpose customdata to match Plotly's format
         customdata = list(zip(*customdata))

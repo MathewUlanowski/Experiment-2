@@ -3,6 +3,7 @@ import os
 from simulations.dca_simulation import run_dca_simulation
 from simulations.bond_simulation import run_bond_simulation
 from simulations.savings_simulation import run_savings_simulation  # Import the savings simulation
+from simulations.hybrid_simulation import run_hybrid_simulation  # Import the hybrid simulation
 from datetime import timedelta
 
 # Update logging configuration to include file and line number
@@ -14,7 +15,8 @@ logging.basicConfig(
 SIMULATION_FUNCTIONS = {
     "dca_simulation": run_dca_simulation,
     "bond_simulation": run_bond_simulation,
-    "savings_simulation": run_savings_simulation  # Add savings simulation
+    "savings_simulation": run_savings_simulation,
+    "hybrid_simulation": run_hybrid_simulation  # Add hybrid simulation
 }
 
 def run_simulations(params):

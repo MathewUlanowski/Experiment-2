@@ -76,6 +76,16 @@ def run_dca_simulation(params):
 
             current_date = start_date
             shares = 0
+
+            balance_histories = [{
+                "date": current_date.strftime("%Y-%m-%d"),
+                "account_balance": cash_account.balance,
+                "shares": shares,
+                "price": 0,
+                "cash": cash_account.balance,
+                "investment_value": investment_account.balance,
+            }]
+
             while current_date <= end_date:
 
                 if current_date.day == 1:
@@ -94,15 +104,28 @@ def run_dca_simulation(params):
 
                 # Record the balance for the investment account
                 if current_date.day == 1:
-                    account.balance_history.append({
+                    # If the current price is 0, find the last price that was not 0
+                    if current_price is None or current_price == 0:
+                        last_valid_price = None
+                        temp_date = current_date
+                        while last_valid_price is None and temp_date > start_date:
+                            temp_date -= relativedelta(days=1)
+                            last_valid_price = historical_data_dict.get(temp_date.strftime("%Y-%m-%d"))
+                            if last_valid_price == 0:
+                                last_valid_price = None
+                        current_price = last_valid_price if last_valid_price is not None else 0
+
+                    balance_histories.append({
                         "date": current_date.strftime("%Y-%m-%d"),
                         "account_balance": investment_account.balance + cash_account.balance,
                         "shares": shares,
-                        "price": current_price if current_price is not None else 0,
+                        "price": current_price,
+                        "cash": cash_account.balance,
+                        "investment_value": investment_account.balance
                     })
 
                 current_date += relativedelta(days=1)
-
+            account.balance_history = balance_histories
             accounts.append(account)
 
             # Cache the account for the specific ticker
